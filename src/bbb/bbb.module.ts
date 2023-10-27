@@ -4,7 +4,6 @@ import { BbbController } from './bbb.controller';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [UserModule],
   controllers: [BbbController],
   providers: [BbbService],
 })

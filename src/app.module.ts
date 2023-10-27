@@ -4,14 +4,19 @@ import { AppService } from './app.service';
 import { ChatGateway } from './chat/chat.gateway';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
 import { createClient } from 'redis';
 import { JwtModule } from '@nestjs/jwt';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
-import { Permission } from './user/entities/permission.entity';
 import { BbbModule } from './bbb/bbb.module';
 import { RedisModule } from './redis/redis.module';
+import { RbacUserModule } from './rbac_user/rbac_user.module';
+import { User } from './rbac_user/entities/rbac_user.entity';
+import { Role } from './rbac_user/entities/role.entity';
+import { Permission } from './rbac_user/entities/permission.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { LoginGuard } from './login.guard';
+import { PermissionGuard } from './permission.guard';
 // useFactory 注入支持异步：
 // 用 useFactory 根据传入的 options 动态创建数据库连接对象：
 
@@ -23,10 +28,10 @@ import { RedisModule } from './redis/redis.module';
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'acl_test',
+      database: 'rbac_test',
       synchronize: true,
       logging: true,
-      entities: [User, Permission],
+      entities: [User, Role, Permission],
       poolSize: 10,
       connectorPackage: 'mysql2',
       extra: {
@@ -34,17 +39,26 @@ import { RedisModule } from './redis/redis.module';
       },
     }),
     JwtModule.register({
-      secret: 'fei',
       global: true,
+      secret: 'fei',
       signOptions: {
         expiresIn: '7d',
       },
     }),
-    UserModule,
+    RbacUserModule,
     BbbModule,
-    RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: LoginGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
 })
 export class AppModule {}
