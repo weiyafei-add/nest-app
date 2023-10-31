@@ -42,7 +42,7 @@ import { PermissionGuard } from './permission.guard';
       global: true,
       secret: 'fei',
       signOptions: {
-        expiresIn: '7d',
+        expiresIn: '30m',
       },
     }),
     RbacUserModule,

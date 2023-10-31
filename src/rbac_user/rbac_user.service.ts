@@ -114,6 +114,14 @@ export class RbacUserService {
     return user;
   }
 
+  async findUserById(userId: number) {
+    return await this.entityManager.findOne(User, {
+      where: {
+        id: userId,
+      },
+    });
+  }
+
   async findRolesByIds(roleIds: number[]) {
     return this.entityManager.find(Role, {
       where: {

@@ -26,10 +26,34 @@ export class UserController {
   @Post('login')
   async login(@Body() loginUser: LoginDto, @Session() session) {
     const user = await this.userService.login(loginUser);
+
+    const access_token = this.jwtService.sign(
+      {
+        userId: user.id,
+        username: user.username,
+      },
+      {
+        expiresIn: '30m',
+      },
+    );
+
+    const refresh_token = this.jwtService.sign(
+      {
+        userId: user.id,
+      },
+      {
+        expiresIn: '7d',
+      },
+    );
+
     session.user = {
       username: user.username,
     };
-    return 'success';
+
+    return {
+      access_token,
+      refresh_token,
+    };
   }
 
   @Post('register')
