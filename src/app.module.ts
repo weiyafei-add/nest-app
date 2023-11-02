@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ChatGateway } from './chat/chat.gateway';
-import { UserModule } from './user/user.module';
+// import { ChatGateway } from './chat/chat.gateway';
+// import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { createClient } from 'redis';
+// import { createClient } from 'redis';
 import { JwtModule } from '@nestjs/jwt';
-import { UserController } from './user/user.controller';
-import { UserService } from './user/user.service';
-import { BbbModule } from './bbb/bbb.module';
-import { RedisModule } from './redis/redis.module';
+// import { UserController } from './user/user.controller';
+// import { UserService } from './user/user.service';
+// import { BbbModule } from './bbb/bbb.module';
+// import { RedisModule } from './redis/redis.module';
 import { RbacUserModule } from './rbac_user/rbac_user.module';
 import { User } from './rbac_user/entities/rbac_user.entity';
 import { Role } from './rbac_user/entities/role.entity';
@@ -24,7 +24,7 @@ import { PermissionGuard } from './permission.guard';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: '192.168.3.136',
       port: 3306,
       username: 'root',
       password: 'root',
@@ -46,7 +46,7 @@ import { PermissionGuard } from './permission.guard';
       },
     }),
     RbacUserModule,
-    BbbModule,
+    // BbbModule,
   ],
   controllers: [AppController],
   providers: [
