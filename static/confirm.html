@@ -31,6 +31,9 @@
     </style>
   </head>
   <body>
+    <button id="fei">登录feifei账号</button>
+    <button id="qi">登录qiqi账号</button>
+
     <div id="info">是否确认登录会议综合管理系统？</div>
     <button id="confirm">确认登录</button>
     <button id="cancel">取消</button>
@@ -42,9 +45,42 @@
         alert('二维码已过期');
       });
 
-      document.getElementById('confirm').addEventListener('click', () => {
+      let token = '';
+
+      document.getElementById('fei').addEventListener('click', () => {
         axios
-          .get('http://192.168.3.136:3000/qrcode/confirm?id=' + id)
+          .get('http://192.168.3.136:3000/login', {
+            params: {
+              username: 'feifei',
+              password: '123',
+            },
+          })
+          .then((res) => {
+            token = res.data;
+          });
+      });
+
+      document.getElementById('qi').addEventListener('click', () => {
+        axios
+          .get('http://192.168.31.56:3000/login', {
+            params: {
+              username: 'qiqi',
+              password: '456',
+            },
+          })
+          .then((res) => {
+            token = res.data;
+          });
+      });
+
+      document.getElementById('confirm').addEventListener('click', () => {
+        console.log(token);
+        axios
+          .get('http://192.168.3.136:3000/qrcode/confirm?id=' + id, {
+            headers: {
+              authorization: 'Bearer ' + token,
+            },
+          })
           .catch((e) => {
             alert('二维码已过期');
           });

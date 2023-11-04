@@ -1,7 +1,16 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Headers,
+  Inject,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { randomUUID } from 'crypto';
 import * as qrcode from 'qrcode';
+import { JwtService } from '@nestjs/jwt';
 
 interface QrCodeInfo {
   status:
@@ -21,9 +30,49 @@ const map = new Map<string, QrCodeInfo>();
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @Inject(JwtService)
+  private jwtService: JwtService;
+
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  private users = [
+    { id: 1, username: 'feifei', password: '123' },
+    { id: 2, username: 'qiqi', password: '456' },
+  ];
+
+  @Get('login')
+  async login(
+    @Query('username') username: string,
+    @Query('password') password: string,
+  ) {
+    const user = this.users.find((item) => item.username === username);
+
+    if (!user) {
+      throw new UnauthorizedException('用户不存在');
+    }
+
+    if (password !== user.password) {
+      throw new UnauthorizedException('密码错误');
+    }
+
+    return this.jwtService.sign({
+      userId: user.id,
+    });
+  }
+
+  @Get('userinfo')
+  async userinfo(@Headers('Authorization') auth: string) {
+    try {
+      const [, token] = auth.split(' ');
+      const info = await this.jwtService.verify(token);
+      const user = this.users.find((item) => item.id == info.userId);
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException('token 过期，请重新登录');
+    }
   }
 
   @Get('qrcode/generate')
@@ -45,7 +94,16 @@ export class AppController {
 
   @Get('qrcode/check')
   async check(@Query('id') id: string) {
-    return map.get(`qrcode_${id}`);
+    const info = map.get(`qrcode_${id}`);
+    if (info.status === 'scan-confirm') {
+      return {
+        token: this.jwtService.sign({
+          userId: info.userInfo.userId,
+        }),
+        ...info,
+      };
+    }
+    return info;
   }
 
   @Get('qrcode/scan')
@@ -59,12 +117,25 @@ export class AppController {
   }
 
   @Get('qrcode/confirm')
-  async confirm(@Query('id') id: string) {
+  async confirm(
+    @Query('id') id: string,
+    @Headers('Authorization') auth: string,
+  ) {
+    let user;
+    try {
+      const [, token] = auth.split(' ');
+      const info = await this.jwtService.verify(token);
+      console.log(info.userId);
+      user = this.users.find((item) => item.id == info.userId);
+    } catch (error) {}
+
     const info = map.get(`qrcode_${id}`);
     if (!info) {
       throw new BadRequestException('二维码已过期');
     }
+    console.log(user);
     info.status = 'scan-confirm';
+    info.userInfo = user;
     return 'success';
   }
 
