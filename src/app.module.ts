@@ -11,6 +11,9 @@ import { Permission } from './user/entities/permission.entity';
 import { RedisModule } from './redis/redis.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { LoginGuard } from './login.guard';
+import { PermissionGuard } from './permission.guard';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -23,7 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           password: configService.get('mysql_server_password'),
           database: configService.get('mysql_server_database'),
           synchronize: true,
-          logging: false,
+          logging: true,
           entities: [User, Role, Permission],
           poolSize: 10,
           connectorPackage: 'mysql2',
@@ -34,8 +37,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       },
       inject: [ConfigService],
     }),
-    JwtModule.register({
-      secret: 'fei',
+    JwtModule.registerAsync({
+      global: true,
+      useFactory(configService: ConfigService) {
+        return {
+          secret: configService.get('jwt_secret'),
+          signOptions: {
+            expiresIn: '30m',
+          },
+        };
+      },
+      inject: [ConfigService],
     }),
     UserModule,
     RedisModule,
@@ -46,6 +58,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [
+    AppService,
+    ChatGateway,
+    { provide: APP_GUARD, useClass: LoginGuard },
+    { provide: APP_GUARD, useClass: PermissionGuard },
+  ],
 })
 export class AppModule {}

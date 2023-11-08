@@ -6,11 +6,13 @@ import {
   Inject,
   Query,
   UnauthorizedException,
+  SetMetadata,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { randomUUID } from 'crypto';
 import * as qrcode from 'qrcode';
 import { JwtService } from '@nestjs/jwt';
+import { RequireLogin, RequirePermission } from './custom.decorator';
 
 interface QrCodeInfo {
   status:
@@ -33,9 +35,16 @@ export class AppController {
   @Inject(JwtService)
   private jwtService: JwtService;
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('aaa')
+  @RequireLogin()
+  @RequirePermission('ddd')
+  aaa(): string {
+    return 'aaa';
+  }
+
+  @Get('bbb')
+  bbb(): string {
+    return 'bbb';
   }
 
   private users = [
