@@ -12,7 +12,7 @@ import { AppService } from './app.service';
 import { randomUUID } from 'crypto';
 import * as qrcode from 'qrcode';
 import { JwtService } from '@nestjs/jwt';
-import { RequireLogin, RequirePermission } from './custom.decorator';
+import { RequireLogin, RequirePermission, UserInfo } from './custom.decorator';
 
 interface QrCodeInfo {
   status:
@@ -38,7 +38,8 @@ export class AppController {
   @Get('aaa')
   @RequireLogin()
   @RequirePermission('ddd')
-  aaa(): string {
+  aaa(@UserInfo('username') username: string, @UserInfo() userinfo): string {
+    console.log(username, userinfo);
     return 'aaa';
   }
 
