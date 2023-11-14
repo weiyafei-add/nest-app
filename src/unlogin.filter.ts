@@ -18,6 +18,7 @@ export class UnLoginException {
 export class UnloginFilter implements ExceptionFilter {
   catch(exception: UnLoginException, host: ArgumentsHost) {
     const response: Response = host.switchToHttp().getResponse<Response>();
+    console.log(exception.message);
 
     response
       .json({

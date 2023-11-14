@@ -11,9 +11,10 @@ async function bootstrap() {
 
   app.enableCors();
   app.useStaticAssets('static', { prefix: '/pages' });
+  app.useStaticAssets('uploads', { prefix: '/uploads' });
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new FormatResponseInterceptor());
-  app.useGlobalFilters(new UnloginFilter());
+  // app.useGlobalFilters(new UnloginFilter());
   const configServer = app.get(ConfigService);
   await app.listen(configServer.get('nest_server_port'));
 }
