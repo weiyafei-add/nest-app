@@ -1,15 +1,24 @@
+import { EmailService } from './../../../nestjs-course-code/meeting_room_booking_system_backend/src/email/email.service';
+import { MeetingNoticeGateway } from './../meeting_notice/meeting_notice.gateway';
+import { CronJob } from 'cron';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { Injectable, HttpException, Inject } from '@nestjs/common';
+import { Injectable, HttpException, Inject, Logger } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { MeetingRoom } from 'src/meeting-room/entities/meeting-room.entity';
 import { Booking } from './entities/booking.entity';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
-
+import * as dayjs from 'dayjs';
 @Injectable()
 export class BookingService {
-  constructor(private schedulerRegistry: SchedulerRegistry) {}
+  constructor(
+    private schedulerRegistry: SchedulerRegistry,
+    private MeetingNoticeGateway: MeetingNoticeGateway,
+    private EmailService: EmailService,
+  ) {}
+
+  private logger = new Logger();
 
   @Inject(JwtService)
   private JwtService: JwtService;
@@ -87,7 +96,12 @@ export class BookingService {
   }
 
   async bookingRoom(
-    bookingData: { id: number; startTime: number; endTime: number },
+    bookingData: {
+      id: number;
+      startTime: number;
+      endTime: number;
+      clientId: string;
+    },
     Authorization: string,
   ) {
     const room = await this.meetingRoomRepository.findOne({
@@ -109,9 +123,13 @@ export class BookingService {
     booking.user = user;
     booking.startTime = new Date(bookingData.startTime);
     booking.endTime = new Date(bookingData.endTime);
-    console.log(booking);
     try {
       await this.bookingRepository.insert(booking);
+      await this.entityManager.update(MeetingRoom, booking.room.id, {
+        ...booking.room,
+        isBooked: true,
+      });
+      await this.notice(dayjs(booking.startTime), bookingData.clientId, user);
     } catch (error) {
       throw new HttpException('预定失败', 200);
     }
@@ -130,6 +148,9 @@ export class BookingService {
         user: true,
         room: true,
       },
+      order: {
+        createTime: 'DESC',
+      },
     });
 
     return { userBooking };
@@ -142,13 +163,20 @@ export class BookingService {
     return 'success';
   }
 
-  @Cron('* * * * * *', {
-    name: 'noticeUserMeeting',
-  })
-  async notice() {
-    console.log(123);
-    const job = this.schedulerRegistry.getCronJob('noticeUserMeeting');
-
-    job.stop();
+  async notice(date: dayjs.Dayjs, clientId: string, user: User) {
+    const job = new CronJob(
+      new Date(date.subtract(5, 'minutes').valueOf()),
+      async () => {
+        this.MeetingNoticeGateway.sentMessage(clientId, '会议开始通知');
+        this.logger.log('会议开始通知已发出');
+        await this.EmailService.sendMail({
+          to: user.email,
+          subject: '会议室马上开始',
+          html: `<p>会议室开始提醒</p>`,
+        });
+      },
+    );
+    this.schedulerRegistry.addCronJob('meetingStartNotice', job);
+    job.start();
   }
 }

@@ -19,6 +19,7 @@ import { MeetingRoom } from './meeting-room/entities/meeting-room.entity';
 import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MeetingNoticeGateway } from './meeting_notice/meeting_notice.gateway';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({

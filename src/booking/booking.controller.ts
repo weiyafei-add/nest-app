@@ -1,3 +1,4 @@
+import * as dayjs from 'dayjs';
 import {
   Controller,
   Get,
@@ -29,7 +30,13 @@ export class BookingController {
   @Post('room')
   @RequireLogin()
   booking(
-    @Body() bookingData: { id: number; startTime: number; endTime: number },
+    @Body()
+    bookingData: {
+      id: number;
+      startTime: number;
+      endTime: number;
+      clientId: string;
+    },
     @Headers('Authorization') Authorization: string,
   ) {
     return this.bookingService.bookingRoom(bookingData, Authorization);
