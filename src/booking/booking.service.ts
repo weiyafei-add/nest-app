@@ -1,5 +1,5 @@
-import { EmailService } from './../../../nestjs-course-code/meeting_room_booking_system_backend/src/email/email.service';
-import { MeetingNoticeGateway } from './../meeting_notice/meeting_notice.gateway';
+import { EmailService } from '../email/email.service';
+import { MeetingNoticeGateway } from 'src/meeting_notice/meeting_notice.gateway';
 import { CronJob } from 'cron';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Injectable, HttpException, Inject, Logger } from '@nestjs/common';
