@@ -157,9 +157,22 @@ export class BookingService {
   }
 
   async cancel(cancelData: { id: number }) {
+    const bookingRoom = await this.bookingRepository.findOne({
+      where: {
+        id: cancelData.id,
+      },
+      relations: {
+        room: true,
+      },
+    });
+    await this.entityManager.update(MeetingRoom, bookingRoom.room.id, {
+      isBooked: false,
+    });
+
     await this.bookingRepository.delete({
       id: cancelData.id,
     });
+
     return 'success';
   }
 
