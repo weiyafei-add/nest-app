@@ -1,7 +1,7 @@
 import { EmailService } from '../email/email.service';
 import { MeetingNoticeGateway } from 'src/meeting_notice/meeting_notice.gateway';
 import { CronJob } from 'cron';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { Injectable, HttpException, Inject, Logger } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -88,6 +88,9 @@ export class BookingService {
           id: userId,
         },
       },
+      relations: {
+        room: true,
+      },
     });
     return {
       history,
@@ -153,7 +156,14 @@ export class BookingService {
       },
     });
 
-    return { userBooking };
+    // 查找今天的
+    const data = userBooking.filter((item) => {
+      const currentDay = dayjs().get('days');
+      const meetingDay = dayjs(item.startTime).get('days');
+      return meetingDay >= currentDay;
+    });
+
+    return { userBooking: data };
   }
 
   async cancel(cancelData: { id: number }) {

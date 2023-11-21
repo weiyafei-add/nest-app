@@ -21,6 +21,7 @@ import { RequireLogin, UserInfo } from 'src/custom.decorator';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
+  // 我的历史预定列表
   @Get('history')
   @RequireLogin()
   getBookingHistory(@UserInfo('userId') userId: number) {
@@ -42,6 +43,7 @@ export class BookingController {
     return this.bookingService.bookingRoom(bookingData, Authorization);
   }
 
+  // 我的预定列表
   @Get('myBooking')
   @RequireLogin()
   getMyBooking(@UserInfo('userId') userId: number) {
