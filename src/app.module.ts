@@ -20,6 +20,7 @@ import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MeetingNoticeGateway } from './meeting_notice/meeting_notice.gateway';
+import { StatisticModule } from './statistic/statistic.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -65,6 +66,7 @@ import { MeetingNoticeGateway } from './meeting_notice/meeting_notice.gateway';
     MeetingRoomModule,
     BookingModule,
     ScheduleModule.forRoot(),
+    StatisticModule,
   ],
   controllers: [AppController],
   providers: [

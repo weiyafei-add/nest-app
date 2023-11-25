@@ -197,6 +197,7 @@ export class BookingService {
           subject: '会议室马上开始',
           html: `<p>会议室开始提醒</p>`,
         });
+        this.schedulerRegistry.deleteCronJob('meetingStartNotice');
       },
     );
     this.schedulerRegistry.addCronJob('meetingStartNotice', job);
