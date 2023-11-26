@@ -212,6 +212,13 @@ export class UserService {
       },
     });
 
+    if (passwordDto.nickName) {
+      foundUser.nickName = passwordDto.nickName;
+    }
+    if (passwordDto.headPic) {
+      foundUser.headPic = passwordDto.headPic;
+    }
+
     foundUser.password = md5(passwordDto.password);
 
     try {
@@ -276,5 +283,19 @@ export class UserService {
     });
 
     return { users, totalCount };
+  }
+
+  // 更新头像
+
+  async updateUserAvatar(avatar: string, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    user.headPic = avatar;
+
+    await this.userRepository.save(user);
   }
 }

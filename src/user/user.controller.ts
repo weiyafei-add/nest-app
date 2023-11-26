@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Headers,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUser } from './dto/register-user.dto';
@@ -259,6 +260,7 @@ export class UserController {
       storage: storage,
       fileFilter: (req, file, callback) => {
         const extname = path.extname(file.originalname);
+        console.log('extname', extname);
         if (['.png', '.jpg', '.gif'].includes(extname)) {
           callback(null, true);
         } else {
@@ -267,8 +269,12 @@ export class UserController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Headers('Authorization') Authorization: string,
+  ) {
+    const userInfo = this.jwtService.verify(Authorization.split(' ')[1]);
+    await this.userService.updateUserAvatar(file.path, userInfo.userId);
     return file.path;
   }
 }
