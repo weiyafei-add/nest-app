@@ -104,6 +104,7 @@ export class BookingService {
       startTime: number;
       endTime: number;
       clientId: string;
+      attendMeetingList: string;
     },
     Authorization: string,
   ) {
@@ -126,6 +127,7 @@ export class BookingService {
     booking.user = user;
     booking.startTime = new Date(bookingData.startTime);
     booking.endTime = new Date(bookingData.endTime);
+    booking.attendMeetingList = JSON.stringify(bookingData.attendMeetingList);
     try {
       await this.bookingRepository.insert(booking);
       await this.entityManager.update(MeetingRoom, booking.room.id, {

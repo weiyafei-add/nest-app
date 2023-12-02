@@ -53,4 +53,6 @@ export class Booking {
 
   @ManyToOne(() => MeetingRoom)
   room: MeetingRoom;
+
+  attendMeetingList: string;
 }

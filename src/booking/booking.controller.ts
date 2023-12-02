@@ -37,6 +37,7 @@ export class BookingController {
       startTime: number;
       endTime: number;
       clientId: string;
+      attendMeetingList: string;
     },
     @Headers('Authorization') Authorization: string,
   ) {
