@@ -20,11 +20,7 @@ const sockets = {};
 const peers = {};
 const options = { depth: null, colors: true };
 
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-})
+@WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;

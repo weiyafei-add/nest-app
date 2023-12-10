@@ -13,6 +13,8 @@ import { randomUUID } from 'crypto';
 import * as qrcode from 'qrcode';
 import { JwtService } from '@nestjs/jwt';
 import { RequireLogin, RequirePermission, UserInfo } from './custom.decorator';
+import { UserService } from './user/user.service';
+import { ConfigService } from '@nestjs/config';
 
 interface QrCodeInfo {
   status:
@@ -34,6 +36,12 @@ export class AppController {
 
   @Inject(JwtService)
   private jwtService: JwtService;
+
+  @Inject(UserService)
+  private userService: UserService;
+
+  @Inject(ConfigService)
+  private configService:ConfigService 
 
   @Get('aaa')
   @RequireLogin()
@@ -89,7 +97,7 @@ export class AppController {
   async generate() {
     const uuid = randomUUID();
     const dataUrl = await qrcode.toDataURL(
-      `http://192.168.3.136:3000/pages/confirm.html?id=${uuid}`,
+      `https://116.204.21.112/end/pages/confirm.html?id=${uuid}`,
     );
 
     map.set(`qrcode_${uuid}`, {
@@ -103,15 +111,39 @@ export class AppController {
   }
 
   @Get('qrcode/check')
-  async check(@Query('id') id: string) {
+  async check(@Query('id') id: string, @Query('userId') userId: number) {
+    console.log(map)
     const info = map.get(`qrcode_${id}`);
     if (info.status === 'scan-confirm') {
-      return {
-        token: this.jwtService.sign({
-          userId: info.userInfo.userId,
-        }),
-        ...info,
-      };
+      const user =  await this.userService.findUserById(userId, false);
+      
+      const vo =  await this.userService.login({username: user.username, password: user.password}, false, true) as any
+      
+      
+      vo.accessToken = this.jwtService.sign(
+        {
+          userId: vo.userInfo.id,
+          username: vo.userInfo.username,
+          roules: vo.userInfo.roles,
+          permission: vo.userInfo.permissions,
+        },
+        {
+          expiresIn:
+            this.configService.get('jwt_access_token_expires_time') || '30m',
+        },
+      );
+  
+      vo.refreshToken = this.jwtService.sign(
+        {
+          userId: vo.userInfo.id,
+        },
+        {
+          expiresIn:
+            this.configService.get('jwt_refresh_token_expres_time') || '7d',
+        },
+      );
+  
+      return {...vo, status: 'scan-confirm'};
     }
     return info;
   }

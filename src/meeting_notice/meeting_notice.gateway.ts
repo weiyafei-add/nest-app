@@ -8,11 +8,7 @@ import { Server, Socket } from 'socket.io';
 
 const clients = {} as Record<string, Socket>;
 
-@WebSocketGateway(3636, {
-  cors: {
-    origin: '*',
-  },
-})
+@WebSocketGateway(3636)
 export class MeetingNoticeGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;

@@ -86,3 +86,7 @@ Nest is [MIT licensed](LICENSE).
         解决方案：播放器是固定定位，首次进入不设置宽度，点击的时候将宽度设置为100%
 
  -->
+
+ docker run --hostname=7885236ee7db --mac-address=02:42:ac:11:00:02 --env=MYSQL_ROOT_PASSWORD=root --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=GOSU_VERSION=1.16 --env=MYSQL_MAJOR=innovation --env=MYSQL_VERSION=8.1.0-1.el8 --env=MYSQL_SHELL_VERSION=8.0.34-1.el8 --volume=E:\tmp\sqldata:/var/lib/mysql --volume=/var/lib/mysql -p 3306:3306 --runtime=runc -d mysql:latest
+
+ CREATE DATABASE `meeting_room_booking_system` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;

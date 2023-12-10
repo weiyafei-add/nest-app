@@ -21,6 +21,7 @@ import { Booking } from './booking/entities/booking.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MeetingNoticeGateway } from './meeting_notice/meeting_notice.gateway';
 import { StatisticModule } from './statistic/statistic.module';
+import { UserService } from './user/user.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({

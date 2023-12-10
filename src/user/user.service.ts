@@ -115,7 +115,7 @@ export class UserService {
     }
   }
 
-  async login(loginUser: LoginUserDto, isAdmin: boolean) {
+  async login(loginUser: LoginUserDto, isAdmin: boolean, isScanLogin?: boolean) {
     const user = await this.userRepository.findOne({
       where: {
         username: loginUser.username,
@@ -128,7 +128,7 @@ export class UserService {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
 
-    if (user.password !== md5(loginUser.password)) {
+    if (!isScanLogin && user.password !== md5(loginUser.password)) {
       throw new HttpException('密码不正确', HttpStatus.BAD_REQUEST);
     }
 
@@ -171,6 +171,7 @@ export class UserService {
       id: user.id,
       username: user.username,
       isAdmin: user.isAdmin,
+      password: user.password,
       roles: user.roles.map((item) => item.name),
       permissions: user.roles.reduce((arr, item) => {
         item.permissions.forEach((permission) => {
