@@ -62,7 +62,7 @@ import { UserService } from './user/user.service';
     EmailModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'src/.env',
+      envFilePath: ['.env', 'src/.env'],
     }),
     MeetingRoomModule,
     BookingModule,
