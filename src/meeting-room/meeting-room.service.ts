@@ -1,14 +1,23 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { CreateMeetingRoomDto } from './dto/create-meeting-room.dto';
 import { UpdateMeetingRoomDto } from './dto/update-meeting-room.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { MeetingRoom } from './entities/meeting-room.entity';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, EntityManager } from 'typeorm';
+import { Booking } from 'src/booking/entities/booking.entity';
+import { BookingService } from 'src/booking/booking.service';
 
 @Injectable()
 export class MeetingRoomService {
+
+  @InjectEntityManager()
+  private EntityManager: EntityManager;
+  
   @InjectRepository(MeetingRoom)
   private meetingRoomRepository: Repository<MeetingRoom>;
+
+  @Inject(BookingService)
+  private bookingService: BookingService
 
   initData() {
     const room1 = new MeetingRoom();
@@ -112,6 +121,27 @@ export class MeetingRoomService {
     await this.meetingRoomRepository.delete({
       id,
     });
+    return 'success';
+  }
+
+  async free(id: number) {
+    const meetingRoom = await this.meetingRoomRepository.findOneBy({
+      id: id,
+    });
+    const bookingData = await this.EntityManager.findOne(Booking, {
+      where: {
+        room: {
+          id: meetingRoom.id,
+        }
+      },
+      relations: {
+        room: true
+      }
+    })
+
+    await this.bookingService.cancel({id: bookingData.id});
+    // meetingRoom.isBooked = false;
+    // await this.meetingRoomRepository.save(meetingRoom);
     return 'success';
   }
 }

@@ -53,4 +53,9 @@ export class MeetingRoomController {
   async delete(@Param('id') id: number) {
     return await this.meetingRoomService.delete(id);
   }
+
+  @Post('free')
+  async freeRoom(@Body('id') id: number) {
+    return await this.meetingRoomService.free(id);
+  }
 }
